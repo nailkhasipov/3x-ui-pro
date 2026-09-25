@@ -31,7 +31,7 @@
 **Шаг 1 — скачать скрипт**
 
 ```bash
-wget -qO x-ui-latest.sh https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-latest.sh
+wget -qO x-ui-latest.sh https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main/x-ui-latest.sh
 ```
 
 **Шаг 2 — запустить**
@@ -46,7 +46,7 @@ bash x-ui-latest.sh
 Применить текущие фиксы к существующей установке (без изменений БД):
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-patch.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main/x-ui-patch.sh)
 ```
 
 ---
@@ -59,7 +59,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-
 - **Админка** — на случайном пути `/adg-<random>/` (логин и пароль выводит скрипт)
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-adguard.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main/x-ui-adguard.sh)
 ```
 
 Повторный запуск безопасен (настройки и пароль сохраняются). После установщика или патча запустите скрипт ещё раз — они перезаписывают конфиг nginx.
@@ -67,7 +67,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-
 Удаление:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-adguard.sh) -uninstall y
+bash <(curl -fsSL https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main/x-ui-adguard.sh) -uninstall y
 ```
 
 ---
@@ -109,7 +109,7 @@ bash x-ui-latest.sh -uninstall y
 **Установить скрипт бэкапа**
 
 ```bash
-wget -qO /usr/local/bin/x-ui-backup https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/assets/backup/x-ui-backup.sh
+wget -qO /usr/local/bin/x-ui-backup https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main/assets/backup/x-ui-backup.sh
 chmod +x /usr/local/bin/x-ui-backup
 ```
 

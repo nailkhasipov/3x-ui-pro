@@ -31,7 +31,7 @@ Automated installer for the [3x-ui](https://github.com/MHSanaei/3x-ui) panel wit
 **Step 1 — download the script**
 
 ```bash
-wget -qO x-ui-latest.sh https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-latest.sh
+wget -qO x-ui-latest.sh https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main/x-ui-latest.sh
 ```
 
 **Step 2 — run it**
@@ -46,7 +46,7 @@ bash x-ui-latest.sh -install y
 Apply current fixes to an existing installation (no DB changes):
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-patch.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main/x-ui-patch.sh)
 ```
 
 ---
@@ -59,7 +59,7 @@ Installs [AdGuard Home](https://github.com/AdguardTeam/AdGuardHome) on the panel
 - **Admin UI** — at a random `/adg-<random>/` path (login and password are printed by the script)
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-adguard.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main/x-ui-adguard.sh)
 ```
 
 Re-running is safe (settings and password are kept). After the installer or the patch, run this script again — they rewrite the nginx config.
@@ -67,7 +67,7 @@ Re-running is safe (settings and password are kept). After the installer or the 
 Uninstall:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-adguard.sh) -uninstall y
+bash <(curl -fsSL https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main/x-ui-adguard.sh) -uninstall y
 ```
 
 ---
@@ -108,7 +108,7 @@ The import link is printed by the script after installation.
 **Install the backup script**
 
 ```bash
-wget -qO /usr/local/bin/x-ui-backup https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/assets/backup/x-ui-backup.sh
+wget -qO /usr/local/bin/x-ui-backup https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main/assets/backup/x-ui-backup.sh
 chmod +x /usr/local/bin/x-ui-backup
 ```
 
