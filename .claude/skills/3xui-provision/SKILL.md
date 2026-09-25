@@ -121,6 +121,19 @@ It distinguishes the failure modes that matter, and they need different answers:
 Comparing your own SNI against a neutral one **on the same IP** is the single most
 informative probe: it separates "the address is blocked" from "the name is blocked".
 
+**A port that answers is not proof of anything on some hosts.** HIP/IBCS (AS41745)
+answers SYN on *every* port, listening or not — a bare server with only sshd running
+reports 80, 443, 8443, 12345 and 54321 all "open" from outside. Any DDoS-protected
+host can behave this way. So read the port line only in one direction:
+
+- ports BLOCKED → meaningful, and if the host SYN-proxies, the block sits *above*
+  the provider, which makes it stronger evidence still;
+- ports OPEN → proves nothing; you may be talking to the provider's scrubber.
+
+The tests that cannot be faked this way are ICMP and a real handshake — TLS, or
+better, the tunnel leg. Never sign off a server on "the ports are open"; wait for a
+tunnel that returns the server's own exit IP.
+
 Two failure modes of the test itself, both of which produced confident wrong answers
 in practice:
 

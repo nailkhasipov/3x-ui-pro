@@ -42,6 +42,9 @@ for p in 443 80 22; do
   if port_open "$IP" $p; then echo OPEN; [ $p = 443 ] && tcp443=yes; else echo BLOCKED; fi
 done
 
+echo "  NOTE: some hosts (e.g. AS41745) SYN-answer every port whether or not anything"
+echo "  listens, so OPEN proves nothing here. BLOCKED is meaningful; OPEN is not."
+
 echo "== TLS: your SNI vs a neutral one, same IP =="
 if [ "$tcp443" = no ]; then
   echo "  skipped: tcp/443 is blocked, so nothing can be concluded about names."
