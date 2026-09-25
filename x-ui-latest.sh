@@ -51,7 +51,7 @@ check_cpu
 
 # ─── Constants ───────────────────────────────────────────────────────────────
 XUIDB="/etc/x-ui/x-ui.db"
-GITHUB_RAW="https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main"
+GITHUB_RAW="https://raw.githubusercontent.com/nailkhasipov/3x-ui-pro/main"
 FAKE_SITE_COUNT=50
 
 # ─── Default argument values ─────────────────────────────────────────────────
@@ -1000,7 +1000,10 @@ VALUES (
 INSERT INTO "hosts" ("inbound_id",${gid_col}"sort_order","remark","address","port","security","fingerprint","alpn")
 VALUES
     ((SELECT id FROM inbounds WHERE tag='inbound-8443'),           ${gid_reality} 0, 'reality', '${domain}', 443, 'same', '',        '[]'),
-    ((SELECT id FROM inbounds WHERE tag='inbound-${ws_port}'),     ${gid_ws}      0, 'ws',      '${domain}', 443, 'tls',  'firefox', '["h2","http/1.1"]'),
+    -- WebSocket must advertise http/1.1 only: a client that negotiates h2 sends no
+    -- Upgrade header, so the WS branch in snippets/includes.conf never fires and the
+    -- connection dies. h2 stays on the gRPC host below, which requires it.
+    ((SELECT id FROM inbounds WHERE tag='inbound-${ws_port}'),     ${gid_ws}      0, 'ws',      '${domain}', 443, 'tls',  'firefox', '["http/1.1"]'),
     ((SELECT id FROM inbounds WHERE tag='inbound-/dev/shm/uds2023.sock,0666:0|'), ${gid_xhttp} 0, 'xhttp', '${domain}', 443, 'tls', 'firefox', '["h2","http/1.1"]'),
     ((SELECT id FROM inbounds WHERE tag='inbound-${trojan_port}'), ${gid_trojan}  0, 'trojan',  '${domain}', 443, 'tls',  'firefox', '["h2","http/1.1"]');
 EOF

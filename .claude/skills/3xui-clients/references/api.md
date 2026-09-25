@@ -1,0 +1,137 @@
+# 3x-ui 3.8.5 panel API reference
+
+## Contents
+- [Base URL and auth](#base-url-and-auth)
+- [Request conventions](#request-conventions)
+- [Client endpoints](#client-endpoints)
+- [Inbound endpoints](#inbound-endpoints)
+- [Host endpoints](#host-endpoints)
+- [Client object fields](#client-object-fields)
+- [Database schema](#database-schema)
+
+## Base URL and auth
+
+```
+https://127.0.0.1:<webPort>/<webBasePath>/
+```
+
+Both come from the `settings` table (`webPort`, `webBasePath`). Discover them with:
+
+```bash
+sqlite3 /etc/x-ui/x-ui.db "SELECT key,value FROM settings WHERE key IN ('webPort','webBasePath','subPath','subPort');"
+```
+
+Credentials are in `/root/x-ui-install.log` on a fresh install, or wherever the
+operator stored them; the `users` table holds only a hash.
+
+Login is a two-step: fetch any panel page to obtain the CSRF token from its
+`<meta name="csrf-token" content="...">` tag, then POST it back.
+
+```bash
+B="https://127.0.0.1:$PORT/$BASE"
+TOK=$(curl -sk -c jar "$B/" | grep -oE 'name="csrf-token" content="[^"]+"' | sed 's/.*content="//;s/"//')
+curl -sk -b jar -c jar -X POST "$B/login" \
+     -H "X-CSRF-Token: $TOK" -d "username=$U&password=$P"
+# -> {"success":true,...} and a `3x-ui` session cookie
+```
+
+Take a fresh token from `$B/panel/` for subsequent writes. `secretEnable=false` in
+settings means no additional secret-token login step.
+
+## Request conventions
+
+| Convention | Detail |
+|---|---|
+| Reads | `GET`. A `POST` to a read route returns **404**, not 405 |
+| Writes | `POST` with `Content-Type: application/json` |
+| CSRF | `X-CSRF-Token` header on every write; `X-XSRF-TOKEN` is not accepted |
+| Errors | `{"success":false,"msg":"Something went wrong (<detail>)"}` with HTTP 200 |
+| Through nginx | 4xx/5xx are rewritten to 404 by `proxy_intercept_errors`; debug against 127.0.0.1 |
+
+## Client endpoints
+
+| Method | Path | Body |
+|---|---|---|
+| GET  | `/panel/api/clients/list` | — |
+| GET  | `/panel/api/clients/get/{email}` | — |
+| GET  | `/panel/api/clients/subLinks/{subId}` | — |
+| GET  | `/panel/api/clients/links/{email}` | — |
+| POST | `/panel/api/clients/add` | `{"client": {...}, "inboundIds": [1,2,4]}` |
+| POST | `/panel/api/clients/update/{email}` | flat client object, **no wrapper** |
+| POST | `/panel/api/clients/del/{email}` | — |
+| POST | `/panel/api/clients/{email}/attach` | `{"inboundIds":[...]}` |
+| POST | `/panel/api/clients/{email}/detach` | `{"inboundIds":[...]}` |
+| POST | `/panel/api/clients/bulkCreate` | — |
+| POST | `/panel/api/clients/resetTraffic/{email}` | — |
+
+The differing body shape between `add` and `update` is the single most common
+mistake; both report `client email is required` when given the wrong one.
+
+## Inbound endpoints
+
+| Method | Path |
+|---|---|
+| GET  | `/panel/api/inbounds/list` |
+| GET  | `/panel/api/inbounds/list/slim` |
+| GET  | `/panel/api/inbounds/get/{id}` |
+| POST | `/panel/api/inbounds/add` |
+| POST | `/panel/api/inbounds/update/{id}` |
+| POST | `/panel/api/inbounds/setEnable/{id}` |
+| POST | `/panel/api/inbounds/{id}/delAllClients` |
+
+## Host endpoints
+
+Hosts supersede the legacy `externalProxy` arrays and decide how share links are
+rendered (address, port, security, fingerprint, ALPN).
+
+| Method | Path |
+|---|---|
+| GET  | `/panel/api/hosts/list` |
+| GET  | `/panel/api/hosts/byInbound/{inboundId}` |
+| POST | `/panel/api/hosts/update/{groupId}` |
+| POST | `/panel/api/hosts/add` |
+
+## Client object fields
+
+```json
+{
+  "email":      "nail-2",
+  "uuid":       "generated server-side; whatever you send is discarded",
+  "password":   "trojan password; honoured as sent",
+  "subId":      "subscription id; honoured as sent",
+  "flow":       "xtls-rprx-vision or \"\"",
+  "limitIp":    0,
+  "limitHwid":  0,
+  "totalGB":    0,
+  "expiryTime": 0,
+  "enable":     true,
+  "tgId":       0,
+  "comment":    "",
+  "reset":      0
+}
+```
+
+`tgId` is an int64 — passing `""` fails with
+`cannot unmarshal string into Go struct field clientPayloadWithHwid.tgId`.
+`expiryTime` is a millisecond epoch; `0` means never. `totalGB` is bytes; `0` is
+unlimited.
+
+`flow` is stored once on the client and applied per inbound: the panel writes it
+into REALITY/TCP inbounds and leaves WebSocket and trojan empty, because
+`xtls-rprx-vision` is invalid on those transports.
+
+## Database schema
+
+Relevant tables in `/etc/x-ui/x-ui.db`:
+
+| Table | Purpose |
+|---|---|
+| `clients` | one row per client: `email`, `uuid`, `password`, `sub_id`, `flow`, limits |
+| `client_inbounds` | join table: `client_id`, `inbound_id`, `flow_override` |
+| `inbounds` | inbound definitions; `settings.clients` is a *derived* copy |
+| `client_traffics` | per client/inbound `up`/`down` counters |
+| `hosts` | share-link endpoints: `address`, `port`, `security`, `fingerprint`, `alpn` |
+| `settings` | `webPort`, `webBasePath`, `subPath`, `subPort`, `subEnable` |
+
+`inbounds.settings.clients` is regenerated by the panel from `clients` +
+`client_inbounds`. Editing it directly is what puts the install out of sync.
